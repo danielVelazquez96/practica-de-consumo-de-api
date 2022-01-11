@@ -1,20 +1,34 @@
-import { obtenerChiste as getChiste } from "./http-provider";
-
+const jokerUrl=`https://api.chucknorris.io/jokes/random`;
 const body=document.body;
 let btnOtroChiste,olList;
+// contador de chistes extraidos e imprimidos
+let numChistes;
 
-// Closure para contador de chistes
-const contadorChistes=()=>{
-    let cont=0;
-    const aumentarContador=()=>{
-        cont++;
-        return cont;
+// Consumir API
+// ---------------------------------------------------------------------
+const obtenerChiste=async()=>{
+
+    try{
+        const resp=await fetch(jokerUrl)
+
+        if(!resp.ok)  throw('No se puede realizar la peticion');
+        
+        const {icon_url,id,value}=await resp.json()
+        
+        return  {icon_url,id,value} ;
+
+    }catch(err){
+        throw err;
     }
-    return aumentarContador;
+   
 }
 
-// LLamado del contador
-const aumentarContador=contadorChistes();
+// ------------------------------------------------------------------------
+
+
+
+
+
 
 const crearChisteHtml=()=>{
     const html=
@@ -42,7 +56,7 @@ const eventos=()=>{
     btnOtroChiste.addEventListener('click',async()=>{
 
         btnOtroChiste.disable=true;
-        dibujarChiste(await getChiste());
+        dibujarChiste(await obtenerChiste());
         btnOtroChiste.disable=false;
 
     })
@@ -52,7 +66,7 @@ const dibujarChiste=(chiste)=>{
   
     // Crear elemento
     const olItem=document.createElement('li');
-    olItem.innerHTML=`<b> ${aumentarContador()} </b>: ${chiste.value}`;
+    olItem.innerHTML=`<b> ${numChistes++} </b>: ${chiste.value}`;
     olItem.classList.add('list-group-item');
 
     // Insertar elemento
@@ -60,12 +74,23 @@ const dibujarChiste=(chiste)=>{
 
 }
 
-// Funcion que vamos a querer para renderizar todo el funcionamiento de la pagina
-export const init=()=>{
+
+
+
+
+
+
+const init=()=>{
     // Renderizar html
     crearChisteHtml();
+
+    numChistes=1;
 
     // iniciar los eventos
     eventos();
 }
+
+
+//Iniciar el programa
+init()
 
